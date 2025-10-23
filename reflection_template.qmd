@@ -498,11 +498,13 @@ summary_table_long <- summary_table |>
     values_to = "median_price"
   ) |>
   mutate(
-    care_type = case_when(
-      care_type == "median_center_price" ~ "Center-Based",
-      care_type == "median_family_price" ~ "Family-Based",
-      TRUE ~ care_type
-    ))
+    care_type = fct_recode(care_type,
+      "Center-Based" = "median_center_price",
+      "Family-Based" = "median_family_price"
+    ) |>
+      fct_relevel("Family-Based", "Center-Based")
+  )
+  
 
 ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) ...
 
@@ -550,12 +552,58 @@ The following assignments satisfy the above criteria:
 ```{r}
 #| label: r-2-1
 
+# From Challenge 5
+# Here I have a documented ggplot which uses pipes with a single function per line to eludicate the modifications to the plot clearly. I added the documentations after the fact.
+
+# I display a line plot showing the change in median childcare costs over time,
+# highlighting the gap between center-based and family-based care.
+ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
+              fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
+  labs(
+    title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
+    subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
+    x = "Year",
+    y = "Median Weekly Price (2018 Dollars)",
+    color = "Type of Childcare"
+  ) +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "top",
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(margin = margin(b = 10)),
+    axis.title = element_text(face = "bold"),
+    plot.background = element_rect(color = "black", linewidth = 1) 
+  )
+
 ```
 
 -   Example of **dplyr** pipeline
 
 ```{r}
 #| label: r-2-2
+
+
+# From Challenge 5
+# Here I have a tidy, and documented dplyr pipeline. It avoids redundant calls, creates a tidy table, and is readable. I added the documentations after the fact.
+
+# I pivot the wide summary table into a tidy, long summary table which allows us to easily plot median price for center and family based infant childcare.
+summary_table_long <- summary_table |>
+  pivot_longer(
+    cols = c("median_center_price", "median_family_price"),
+    names_to = "care_type",
+    values_to = "median_price"
+  ) |>
+  mutate(
+    care_type = fct_recode(care_type,
+      "Center-Based" = "median_center_price",
+      "Family-Based" = "median_family_price"
+    ) |>
+      fct_relevel("Family-Based", "Center-Based")
+  )
 
 ```
 
@@ -573,6 +621,44 @@ The following assignments satisfy the above criteria:
 ```{r}
 #| label: r-3-example
 
+# Challenge 5
+#
+
+summary_table_long <- summary_table |>
+  pivot_longer(
+    cols = c("median_center_price", "median_family_price"),
+    names_to = "care_type",
+    values_to = "median_price"
+  ) |>
+  mutate(
+    care_type = fct_recode(care_type,
+      "Center-Based" = "median_center_price",
+      "Family-Based" = "median_family_price"
+    ) |>
+      fct_relevel("Family-Based", "Center-Based")
+  )
+  
+ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
+              fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
+  labs(
+    title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
+    subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
+    x = "Year",
+    y = "Median Weekly Price (2018 Dollars)",
+    color = "Type of Childcare"
+  ) +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "top",
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(margin = margin(b = 10)),
+    axis.title = element_text(face = "bold"),
+    plot.background = element_rect(color = "black", linewidth = 1) 
+  )
 ```
 
 -   Example (function stops)
@@ -591,12 +677,35 @@ The following assignments satisfy the above criteria:
 ```{r}
 #| label: dvs-1-num
 
+# From Challenge 5 
+
+# Lab 2 Question 4
+# Here I plotted hindfoot_length (numerical) against weight (numerical). It is also faceted by species which is categorical.
+
+ggplot(data = surveys,
+       mapping = aes(x=weight, y=hindfoot_length)) +
+  geom_point(alpha=0.3) + facet_wrap(~ species) + labs(x = "Weight (g)", y = "",
+ title ="Scatterplot of Hindfoot Length vs Weight of Various Species",
+ subtitle = "Hindfoot Length (mm)")
+
+
 ```
 
 -   At least one numeric variable and one categorical variable
 
 ```{r}
 #| label: dvs-2-num-cat
+
+# From Challenge 2
+# Here I used ggplot to create boxplots of weight (numerical) by species (categorical).
+
+ggplot(data = surveys, mapping = aes(x = weight, y = species)) +
+  geom_boxplot(outliers=FALSE, orientation="y", aes(color = sex)) +
+  scale_colour_viridis_d() +
+  geom_jitter(alpha=0.1, color="steelblue") +
+  labs(x = "Weight (g)",
+       y = "Species",
+       title = "Distribution of Weight by Species")
 
 ```
 
@@ -605,12 +714,97 @@ The following assignments satisfy the above criteria:
 ```{r}
 #| label: dvs-2-cat
 
+# Lab 4 Question 7
+
+# This ggplot displays the weekly median costs (numerical) per year faceted by childcare type (categorical) and colored by region (categotical).
+
+# 1.) Color by region.
+# 2.) Facet by age group.
+
+
+long_childcare_data <- ca_childcare |>
+  select(study_year, region, mc_infant, mc_toddler, mc_preschool) |>
+  pivot_longer(
+    cols = starts_with("mc"),
+    names_to = "age_group",
+    values_to = "price"
+  ) |>
+  mutate(
+    age_group = fct_recode(age_group,
+    "Infant"    = "mc_infant",
+    "Toddler"   = "mc_toddler",
+    "Preschool" = "mc_preschool"
+    ),
+    age_group = fct_relevel(age_group, "Infant", "Toddler", "Preschool"),
+  )
+
+
+pallete <- colorRampPalette(brewer.pal(7, "Accent"))(10)
+
+ggplot(long_childcare_data, aes(x = study_year, y = price, color = region)) +
+  geom_point(size=0.5) +
+  geom_smooth(method = "loess", alpha = 0.5) +
+  facet_wrap(~ age_group, ncol=3) +
+  labs(
+    title = "Weekly Median Price for Center-Based Childcare ($)",
+    x = "Study Year",
+    y = NULL,
+    color = "California Region"
+  ) +
+  scale_x_continuous(breaks = seq(from = 2008, to = 2018, by = 2)) +
+  scale_color_manual(values = pallete) +
+  theme(aspect.ratio = 1)
+
+
 ```
 
 -   Dates (time series plot)
 
 ```{r}
 #| label: dvs-2-date
+
+
+# Lab 4 Question 7
+
+# This ggplot displays the weekly median costs (numerical) per year (timeseries) faceted by childcare type (categorical) and colored by region (categotical).
+
+# 1.) Color by region.
+# 2.) Facet by age group.
+
+
+long_childcare_data <- ca_childcare |>
+  select(study_year, region, mc_infant, mc_toddler, mc_preschool) |>
+  pivot_longer(
+    cols = starts_with("mc"),
+    names_to = "age_group",
+    values_to = "price"
+  ) |>
+  mutate(
+    age_group = fct_recode(age_group,
+    "Infant"    = "mc_infant",
+    "Toddler"   = "mc_toddler",
+    "Preschool" = "mc_preschool"
+    ),
+    age_group = fct_relevel(age_group, "Infant", "Toddler", "Preschool"),
+  )
+
+
+pallete <- colorRampPalette(brewer.pal(7, "Accent"))(10)
+
+ggplot(long_childcare_data, aes(x = study_year, y = price, color = region)) +
+  geom_point(size=0.5) +
+  geom_smooth(method = "loess", alpha = 0.5) +
+  facet_wrap(~ age_group, ncol=3) +
+  labs(
+    title = "Weekly Median Price for Center-Based Childcare ($)",
+    x = "Study Year",
+    y = NULL,
+    color = "California Region"
+  ) +
+  scale_x_continuous(breaks = seq(from = 2008, to = 2018, by = 2)) +
+  scale_color_manual(values = pallete) +
+  theme(aspect.ratio = 1)
+
 
 ```
 
@@ -621,12 +815,87 @@ The following assignments satisfy the above criteria:
 ```{r}
 #| label: dvs-2-ex-1
 
+# From Challenge 4
+# 
+
+summary_table_long <- summary_table |>
+  pivot_longer(
+    cols = c("median_center_price", "median_family_price"),
+    names_to = "care_type",
+    values_to = "median_price"
+  ) |>
+  mutate(
+    care_type = fct_recode(care_type,
+      "Center-Based" = "median_center_price",
+      "Family-Based" = "median_family_price"
+    ) |>
+      fct_relevel("Family-Based", "Center-Based")
+  )
+  
+ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
+              fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
+  labs(
+    title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
+    subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
+    x = "Year",
+    y = "Median Weekly Price (2018 Dollars)",
+    color = "Type of Childcare"
+  ) +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "top",
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(margin = margin(b = 10)),
+    axis.title = element_text(face = "bold"),
+    plot.background = element_rect(color = "black", linewidth = 1) 
+  )
+
 ```
 
 -   I can modify my colors to be accessible to anyone's eyes
 
 ```{r}
 #| label: dvs-2-ex-2
+
+summary_table_long <- summary_table |>
+  pivot_longer(
+    cols = c("median_center_price", "median_family_price"),
+    names_to = "care_type",
+    values_to = "median_price"
+  ) |>
+  mutate(
+    care_type = fct_recode(care_type,
+      "Center-Based" = "median_center_price",
+      "Family-Based" = "median_family_price"
+    ) |>
+      fct_relevel("Family-Based", "Center-Based")
+  )
+  
+ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
+              fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
+  labs(
+    title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
+    subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
+    x = "Year",
+    y = "Median Weekly Price (2018 Dollars)",
+    color = "Type of Childcare"
+  ) +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "top",
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(margin = margin(b = 10)),
+    axis.title = element_text(face = "bold"),
+    plot.background = element_rect(color = "black", linewidth = 1) 
+  )
 
 ```
 
@@ -635,6 +904,43 @@ The following assignments satisfy the above criteria:
 ```{r}
 #| label: dvs-2-ex-3
 
+summary_table_long <- summary_table |>
+  pivot_longer(
+    cols = c("median_center_price", "median_family_price"),
+    names_to = "care_type",
+    values_to = "median_price"
+  ) |>
+  mutate(
+    care_type = fct_recode(care_type,
+      "Center-Based" = "median_center_price",
+      "Family-Based" = "median_family_price"
+    ) |>
+      fct_relevel("Family-Based", "Center-Based")
+  )
+  
+ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
+              fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
+  labs(
+    title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
+    subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
+    x = "Year",
+    y = "Median Weekly Price (2018 Dollars)",
+    color = "Type of Childcare"
+  ) +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "top",
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(margin = margin(b = 10)),
+    axis.title = element_text(face = "bold"),
+    plot.background = element_rect(color = "black", linewidth = 1) 
+  )
+
+
 ```
 
 -   I can modify the text in my plot to be more readable
@@ -642,12 +948,87 @@ The following assignments satisfy the above criteria:
 ```{r}
 #| label: dvs-2-ex-4
 
+summary_table_long <- summary_table |>
+  pivot_longer(
+    cols = c("median_center_price", "median_family_price"),
+    names_to = "care_type",
+    values_to = "median_price"
+  ) |>
+  mutate(
+    care_type = fct_recode(care_type,
+      "Center-Based" = "median_center_price",
+      "Family-Based" = "median_family_price"
+    ) |>
+      fct_relevel("Family-Based", "Center-Based")
+  )
+  
+ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
+              fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
+  labs(
+    title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
+    subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
+    x = "Year",
+    y = "Median Weekly Price (2018 Dollars)",
+    color = "Type of Childcare"
+  ) +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "top",
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(margin = margin(b = 10)),
+    axis.title = element_text(face = "bold"),
+    plot.background = element_rect(color = "black", linewidth = 1) 
+  )
+
 ```
 
 -   I can reorder my legend to align with the colors in my plot
 
 ```{r}
 #| label: dvs-2-ex-5
+
+# Challenge 4
+# I reordered the legend to make it so it was more intuitive to read from the bottom up. 
+
+summary_table_long <- summary_table |>
+  pivot_longer(
+    cols = c("median_center_price", "median_family_price"),
+    names_to = "care_type",
+    values_to = "median_price"
+  ) |>
+  mutate(
+    care_type = fct_recode(care_type,
+      "Center-Based" = "median_center_price",
+      "Family-Based" = "median_family_price"
+    ) |>
+      fct_relevel("Family-Based", "Center-Based")
+  )
+  
+ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
+              fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
+  labs(
+    title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
+    subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
+    x = "Year",
+    y = "Median Weekly Price (2018 Dollars)",
+    color = "Type of Childcare"
+  ) +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "top",
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(margin = margin(b = 10)),
+    axis.title = element_text(face = "bold"),
+    plot.background = element_rect(color = "black", linewidth = 1) 
+  )
 
 ```
 
@@ -657,6 +1038,30 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: dvs-3-1-ex-1
+
+# Challenge 5
+# Here I used skyblue to denote the area / difference between the price of both care types.
+ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
+              fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
+  labs(
+    title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
+    subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
+    x = "Year",
+    y = "Median Weekly Price (2018 Dollars)",
+    color = "Type of Childcare"
+  ) +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "top",
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(margin = margin(b = 10)),
+    axis.title = element_text(face = "bold"),
+    plot.background = element_rect(color = "black", linewidth = 1) 
+  )
 
 ```
 
@@ -679,6 +1084,32 @@ The following assignments satisfy the above criteria:
 ```{r}
 #| label: dvs-3-3
 
+# Challenge 5
+# Here I used geom_ribbon to denote the price difference between family-based and center-based infant care costs.
+
+ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
+              fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
+  labs(
+    title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
+    subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
+    x = "Year",
+    y = "Median Weekly Price (2018 Dollars)",
+    color = "Type of Childcare"
+  ) +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "top",
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(margin = margin(b = 10)),
+    axis.title = element_text(face = "bold"),
+    plot.background = element_rect(color = "black", linewidth = 1) 
+  )
+
+
 ```
 
 **DVS-4: I can calculate numerical summaries of variables.**
@@ -695,7 +1126,31 @@ The following assignments satisfy the above criteria:
 ```{r}
 #| label: dvs-4-across
 
+# Lab 3 Question 5
+# 
+
+teacher_evals_clean <- teacher_evals |>
+  rename(sex = gender) |>
+  filter(no_participants > 9) |>
+  mutate(
+    across(c(academic_degree, sex, weekday, course_id, teacher_id, question_no), as.factor),
+  ) |>
+  select(
+    course_id,
+    teacher_id,
+    question_no,
+    no_participants,
+    resp_share,
+    SET_score_avg,
+    percent_failed_cur,
+    academic_degree,
+    seniority,
+    sex
+  )
+
 ```
+
+\
 
 **DVS-5: I can find summaries of variables across multiple groups.**
 
@@ -768,6 +1223,28 @@ The following assignments satisfy the above criteria:
 ```{r}
 #| label: pe-1-across
 
+# Lab 3 Question 5
+# 
+
+teacher_evals_clean <- teacher_evals |>
+  rename(sex = gender) |>
+  filter(no_participants > 9) |>
+  mutate(
+    across(c(academic_degree, sex, weekday, course_id, teacher_id, question_no), as.factor),
+  ) |>
+  select(
+    course_id,
+    teacher_id,
+    question_no,
+    no_participants,
+    resp_share,
+    SET_score_avg,
+    percent_failed_cur,
+    academic_degree,
+    seniority,
+    sex
+  )
+
 ```
 
 -   using functions from the `map()` family
@@ -806,6 +1283,29 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: pe-3-across
+
+# Lab 3 Question 5
+# 
+
+teacher_evals_clean <- teacher_evals |>
+  rename(sex = gender) |>
+  filter(no_participants > 9) |>
+  mutate(
+    across(c(academic_degree, sex, weekday, course_id, teacher_id, question_no), as.factor),
+  ) |>
+  select(
+    course_id,
+    teacher_id,
+    question_no,
+    no_participants,
+    resp_share,
+    SET_score_avg,
+    percent_failed_cur,
+    academic_degree,
+    seniority,
+    sex
+  )
+
 
 ```
 
