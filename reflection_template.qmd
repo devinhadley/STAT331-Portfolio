@@ -231,6 +231,15 @@ final_suspect <- facebook_event_checkin |>
 ```{r}
 #| label: wd-4-numeric-ex-1
 
+# Lab 3 question 7
+# Here I create a new column called percentage for each sex by dividing the count for that sex by the total count of all teachers and multiplying by 100.
+
+teacher_evals_clean |>
+  distinct(teacher_id, .keep_all = TRUE) |>
+  count(sex, name="count") |>
+  mutate(percentage = count / sum(count) * 100)
+
+
 ```
 
 -   Numeric Example 2
@@ -238,12 +247,48 @@ final_suspect <- facebook_event_checkin |>
 ```{r}
 #| label: wd-4-numeric-ex-2
 
+# Lab 3 question 10
+# Here I create a new variable called num_courses which is an integer represnting the number of distinct courses a teacher teaches.
+
+teacher_evals_clean |>
+  group_by(teacher_id) |>
+  mutate(num_courses = n_distinct(course_id)) |>
+  filter(question_no == 901) |>
+  summarize(
+    num_courses = first(num_courses),
+    avg_q1_score = mean(SET_score_avg, na.rm = TRUE)
+  ) |>
+  ungroup() |>
+  filter(num_courses >= 5) |>
+  filter(avg_q1_score == min(avg_q1_score) | avg_q1_score == max(avg_q1_score))
+
 ```
 
 -   Factor Example 1 (renaming levels)
 
 ```{r}
-#| label: wd-4-factor-ex-1
+
+# Lab 4 Question 4
+
+# Here is rename the county_name factor by collapsing them into a smaller subset of factors. This effectively renames many counties into their corresponding larger county. 
+
+ca_childcare <- ca_childcare |> 
+  mutate(county_name = str_remove(county_name, " County")) |>
+  mutate(
+  region = fct_collapse(county_name,
+    "Superior California" = superior_counties,
+    "North Coast" = north_coast_counties,
+    "San Francisco" = san_fran_counties,
+    "Northern San Joaquin" = n_san_joaquin_counties,
+    "Central Coast" = central_coast_counties,
+    "Southern San Joaquin" = s_san_joaquin_counties,
+    "Inland Empire" = inland_counties,
+    "Los Angeles" = la_county,
+    "Orange County" = orange_county,
+    "San Diego Imperial" = san_diego_imperial_counties
+  )
+)
+
 
 ```
 
@@ -252,12 +297,57 @@ final_suspect <- facebook_event_checkin |>
 ```{r}
 #| label: wd-4-factor-ex-2
 
+# Lab 4 Question 7
+# Here is an example where I modify the existing age_group and region facors. More specifically, the factors are reordered using fct_relevel which explicitly defines an ordering and fct_reorder which reorders the region factor based on its corresponding 2018 median income (another variable).
+
+long_childcare_data <- left_join(ca_childcare, income_table, by="region") |>
+  select(study_year, region, mc_infant, mc_toddler, mc_preschool, `2018`) |>
+  pivot_longer(
+    cols = starts_with("mc"),
+    names_to = "age_group",
+    values_to = "price"
+  ) |>
+  mutate(
+    age_group = fct_recode(age_group,
+    "Infant"    = "mc_infant",
+    "Toddler"   = "mc_toddler",
+    "Preschool" = "mc_preschool"
+    ),
+    age_group = fct_relevel(age_group, "Infant", "Toddler", "Preschool"),
+    region = fct_reorder(region, `2018`, .desc = TRUE)
+  )
+
 ```
+
+\
+
+\
 
 -   Character (example must use functions from **stringr**)
 
 ```{r}
 #| label: wd-4-string
+
+# Lab 4 Question 4
+
+# Here I modify the existing county_name variable by using stringr's str_remove function to remove any occurance of " County". This effectively leaves us with just the pure name of the county with no county suffix.
+
+ca_childcare <- ca_childcare |> 
+  mutate(county_name = str_remove(county_name, " County")) |>
+  mutate(
+  region = fct_collapse(county_name,
+    "Superior California" = superior_counties,
+    "North Coast" = north_coast_counties,
+    "San Francisco" = san_fran_counties,
+    "Northern San Joaquin" = n_san_joaquin_counties,
+    "Central Coast" = central_coast_counties,
+    "Southern San Joaquin" = s_san_joaquin_counties,
+    "Inland Empire" = inland_counties,
+    "Los Angeles" = la_county,
+    "Orange County" = orange_county,
+    "San Diego Imperial" = san_diego_imperial_counties
+  )
+)
 
 ```
 
@@ -265,6 +355,17 @@ final_suspect <- facebook_event_checkin |>
 
 ```{r}
 #| label: wd-4-date
+
+# From lab 5.
+# Here I modified an existing variable which was an integer representation of a date (i.e. 20180101) into a lubridate so that I could filter by date properties later on.
+
+final_suspect <- facebook_event_checkin |>
+  mutate(date = ymd(date)) |>
+  filter(year(date) == 2017, month(date) == 12, event_name == "SQL Symphony Concert")|>
+  group_by(person_id) |>
+  filter(n() == 3) |>
+  inner_join(women_matching_description, by = c("person_id" = "id"))
+
 
 ```
 
@@ -274,6 +375,20 @@ final_suspect <- facebook_event_checkin |>
 
 ```{r}
 #| label: wd-5-left-ex-1
+
+# From lab 5
+# Here I did a left join because even if there was no correponding income data for the person, I still wanted to keep their record as income wasn't that vital to the investigation.
+
+women_matching_description <- person |>
+  inner_join(drivers_license, by = c("license_id" = "id")) |>
+  left_join(income, by = "ssn") |>
+  filter(gender == "female",
+         height %in% c(65, 66, 67),
+         hair_color == "red",
+         car_make == "Tesla",
+         car_model == "Model S")
+
+
 
 ```
 
@@ -289,12 +404,40 @@ final_suspect <- facebook_event_checkin |>
 ```{r}
 #| label: wd-5-left-right-ex-2
 
+# Lab 5
+# I modified this problem from using inner_join to left_join as a proof of concept.
+# For this problem I wanted to join member check ins with the membership status.
+# Left join here will preserve all the check ins on the 9th regardless whether it 
+# has a corresponding member in get_fit_now members. However any NA entries are still
+# filtered out by checking for membership_status == "gold".
+
+
+gold_members_who_checked_in_on_9th <- get_fit_now_check_in |>
+  filter(check_in_date == 20180109) |>
+  select(membership_id) |>
+  rename(id = membership_id) |>
+  left_join(get_fit_now_member) |>
+  filter(membership_status == "gold")
+
 ```
+
+\
 
 -   `inner_join()` Example 1
 
 ```{r}
 #| label: wd-5-inner-ex-1
+
+
+
+# Lab 5
+# Here I wanted to find gold members who checked in on the 9th and also had a plate number including H42W.
+# Inner join was especially useful as I only wanted the rows with a match in both tables since I am connecting them logically.
+
+person |>
+  semi_join(gold_members_who_checked_in_on_9th, by = c("id" = "person_id")) |>
+  inner_join(drivers_license, by = c("license_id" = "id")) |>
+  filter(str_detect(plate_number, "H42W"))
 
 ```
 
@@ -302,6 +445,15 @@ final_suspect <- facebook_event_checkin |>
 
 ```{r}
 #| label: wd-5-inner-ex-2
+
+# Lab 4 Question 2
+
+# Here I used an inner join as it only made sense in the context of the assignment to analyze counties with corresponding childcare cost data. Thus there is no reason to include counties without costs or costs without a corresponding county in our dataframe.
+
+ca_childcare <- 
+  inner_join(counties, childcare_costs, by="county_fips_code") |>
+  filter(state_abbreviation == "CA")
+
 
 ```
 
@@ -311,6 +463,14 @@ final_suspect <- facebook_event_checkin |>
 
 ```{r}
 #| label: wd-6-semi
+
+# Lab 5
+# Here I used a semi join in order to filter the persons table based on the gold members who checked in on the 9th. More specifically, I only kept persons who's id appeared in the gold members who checked in on the 9th person_id column.
+
+person |>
+  semi_join(gold_members_who_checked_in_on_9th, by = c("id" = "person_id")) |>
+  inner_join(drivers_license, by = c("license_id" = "id")) |>
+  filter(str_detect(plate_number, "H42W"))
 
 ```
 
@@ -328,6 +488,24 @@ final_suspect <- facebook_event_checkin |>
 ```{r}
 #| label: wd-7-long
 
+# Challenge 4
+# Here I used pivot longer to convert the summary table, which was in a wide format (multiple variables in one column) into a tidy / long format where center type and median price become their own columns. This made it far easier to plot later on.
+
+summary_table_long <- summary_table |>
+  pivot_longer(
+    cols = c("median_center_price", "median_family_price"),
+    names_to = "care_type",
+    values_to = "median_price"
+  ) |>
+  mutate(
+    care_type = case_when(
+      care_type == "median_center_price" ~ "Center-Based",
+      care_type == "median_family_price" ~ "Family-Based",
+      TRUE ~ care_type
+    ))
+
+ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) ...
+
 ```
 
 -   `pivot_wider()`
@@ -335,6 +513,22 @@ final_suspect <- facebook_event_checkin |>
 ```{r}
 #| label: wd-7-wide
 
+# Lab 4 Question 5
+# Here I used pivot_wider to transform the long format summary dataframe of median incomes for each region and year into a wide, human-readable table, creating separate "Median Income 2008" and "Median Income 2018".
+
+income_table <- ca_childcare |>
+  filter(study_year %in% c(2008, 2018)) |>
+  group_by(region, study_year) |>
+  summarise(
+    median_income = median(me_2018),
+  ) |>
+  ungroup() |>
+  pivot_wider(
+    names_from = study_year,
+    values_from = median_income,
+    names_prefix = "Median Income "
+  ) |>
+  arrange(desc(`Median Income 2018`))
 ```
 
 ## Reproducibility
