@@ -1330,12 +1330,89 @@ teacher_evals_clean <- teacher_evals |>
 ```{r}
 #| label: pe-4-1
 
+# Challenge 4
+# Here I created an analysis using non-deprecated ggplot and dplyr functions.
+
+summary_table_long <- summary_table |>
+  pivot_longer(
+    cols = c("median_center_price", "median_family_price"),
+    names_to = "care_type",
+    values_to = "median_price"
+  ) |>
+  mutate(
+    care_type = fct_recode(care_type,
+      "Center-Based" = "median_center_price",
+      "Family-Based" = "median_family_price"
+    ) |>
+      fct_relevel("Family-Based", "Center-Based")
+  )
+  
+ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
+              fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
+  labs(
+    title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
+    subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
+    x = "Year",
+    y = "Median Weekly Price (2018 Dollars)",
+    color = "Type of Childcare"
+  ) +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "top",
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(margin = margin(b = 10)),
+    axis.title = element_text(face = "bold"),
+    plot.background = element_rect(color = "black", linewidth = 1) 
+
 ```
 
 -   I can connect a data wrangling pipeline into a `ggplot()`
 
 ```{r}
 #| label: pe-4-2
+
+# Challenge 4
+# Here I used dplyr to "wrangle" the summary table and then use that table within ggplot.
+
+summary_table_long <- summary_table |>
+  pivot_longer(
+    cols = c("median_center_price", "median_family_price"),
+    names_to = "care_type",
+    values_to = "median_price"
+  ) |>
+  mutate(
+    care_type = fct_recode(care_type,
+      "Center-Based" = "median_center_price",
+      "Family-Based" = "median_family_price"
+    ) |>
+      fct_relevel("Family-Based", "Center-Based")
+  )
+  
+ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
+              fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
+  labs(
+    title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
+    subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
+    x = "Year",
+    y = "Median Weekly Price (2018 Dollars)",
+    color = "Type of Childcare"
+  ) +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "top",
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(margin = margin(b = 10)),
+    axis.title = element_text(face = "bold"),
+    plot.background = element_rect(color = "black", linewidth = 1) 
+
 
 ```
 
