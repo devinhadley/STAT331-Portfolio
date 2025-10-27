@@ -1,7 +1,9 @@
 ---
 title: "STAT 331 Portfolio"
 author: "Devin Hadley"
-format: html 
+format:
+  html:
+    theme: minty
 embed-resources: true
 layout: margin-left
 editor: visual
@@ -167,7 +169,7 @@ teacher_evals_clean <- teacher_evals |>
 -   Numeric Example 2
 
 ```{r}
-#| label: wd-3-numeric-ex-1
+#| label: wd-3-numeric-ex-2
 
 # From lab 5.
 # Here I filter based on the date as an integer.
@@ -1510,7 +1512,6 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
 reg_mod1 <- lm(mc_infant ~ mhi_2018, data = ca_childcare)
 
 summary(reg_mod1)
-
 ```
 
 -   Example 2
