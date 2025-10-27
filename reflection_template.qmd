@@ -94,6 +94,13 @@ teacher_evals_clean <- teacher_evals |>
 ```{r}
 #| label: wd-2-ex-2
 
+# PA 5.3 Question 3
+
+# In this problem I effectively remove columns by negating the condition that the day of the week is Tuesday or Thursday. 
+
+suspects |>
+  filter( ! (wday(Time.Spotted, label = TRUE, abbr = FALSE) %in% c("Tuesday", "Thursday")) )
+
 
 ```
 
@@ -163,7 +170,7 @@ teacher_evals_clean <- teacher_evals |>
 #| label: wd-3-numeric-ex-1
 
 # From lab 5.
-# We filter based on the date as an integer.
+# Here I filter based on the date as an integer.
 
 gold_members_who_checked_in_on_9th <- get_fit_now_check_in |>
   filter(check_in_date == 20180109) |>
@@ -180,7 +187,7 @@ gold_members_who_checked_in_on_9th <- get_fit_now_check_in |>
 #| label: wd-3-character
 
 # From lab 5.
-# We filter based string equality.
+# Here I filter based string equality.
 
 
 gold_members_who_checked_in_on_9th <- get_fit_now_check_in |>
@@ -198,7 +205,7 @@ gold_members_who_checked_in_on_9th <- get_fit_now_check_in |>
 #| label: wd-3-string
 
 # From lab 5.
-# We filter using str_detect to get strings which contain H42W.
+# Here I filter using str_detect to get strings which contain H42W.
 
 person |>
   semi_join(gold_members_who_checked_in_on_9th, by = c("id" = "person_id")) |>
@@ -213,7 +220,7 @@ person |>
 #| label: wd-3-date
 
 # From lab 5.
-# We convert the date using mutate and lubridate, and then filter based on month and year
+# Here I convert the date using mutate and lubridate, and then filter based on month and year
 
 final_suspect <- facebook_event_checkin |>
   mutate(date = ymd(date)) |>
@@ -267,28 +274,30 @@ teacher_evals_clean |>
 -   Factor Example 1 (renaming levels)
 
 ```{r}
+#| label: wd-4-factor-ex-1
 
 # Lab 4 Question 4
 
 # Here is rename the county_name factor by collapsing them into a smaller subset of factors. This effectively renames many counties into their corresponding larger county. 
 
-ca_childcare <- ca_childcare |> 
-  mutate(county_name = str_remove(county_name, " County")) |>
-  mutate(
-  region = fct_collapse(county_name,
-    "Superior California" = superior_counties,
-    "North Coast" = north_coast_counties,
-    "San Francisco" = san_fran_counties,
-    "Northern San Joaquin" = n_san_joaquin_counties,
-    "Central Coast" = central_coast_counties,
-    "Southern San Joaquin" = s_san_joaquin_counties,
-    "Inland Empire" = inland_counties,
-    "Los Angeles" = la_county,
-    "Orange County" = orange_county,
-    "San Diego Imperial" = san_diego_imperial_counties
-  )
-)
+# This solution was revised from its initial submission. I removed the initial mutate for just county_name, and moved it into the mutate for collapsing into the region as an aditional argument.
 
+ca_childcare <- ca_childcare |> 
+  mutate(
+    county_name = str_remove(county_name, " County"),
+    region = fct_collapse(county_name,
+      "Superior California" = superior_counties,
+      "North Coast" = north_coast_counties,
+      "San Francisco" = san_fran_counties,
+      "Northern San Joaquin" = n_san_joaquin_counties,
+      "Central Coast" = central_coast_counties,
+      "Southern San Joaquin" = s_san_joaquin_counties,
+      "Inland Empire" = inland_counties,
+      "Los Angeles" = la_county,
+      "Orange County" = orange_county,
+      "San Diego Imperial" = san_diego_imperial_counties
+    )
+  )
 
 ```
 
@@ -332,22 +341,24 @@ long_childcare_data <- left_join(ca_childcare, income_table, by="region") |>
 
 # Here I modify the existing county_name variable by using stringr's str_remove function to remove any occurance of " County". This effectively leaves us with just the pure name of the county with no county suffix.
 
+# This solution was revised from its initial submission. I removed the initial mutate for just county_name, and moved it into the mutate for collapsing into the region as an aditional argument.
+
 ca_childcare <- ca_childcare |> 
-  mutate(county_name = str_remove(county_name, " County")) |>
   mutate(
-  region = fct_collapse(county_name,
-    "Superior California" = superior_counties,
-    "North Coast" = north_coast_counties,
-    "San Francisco" = san_fran_counties,
-    "Northern San Joaquin" = n_san_joaquin_counties,
-    "Central Coast" = central_coast_counties,
-    "Southern San Joaquin" = s_san_joaquin_counties,
-    "Inland Empire" = inland_counties,
-    "Los Angeles" = la_county,
-    "Orange County" = orange_county,
-    "San Diego Imperial" = san_diego_imperial_counties
+    county_name = str_remove(county_name, " County"),
+    region = fct_collapse(county_name,
+      "Superior California" = superior_counties,
+      "North Coast" = north_coast_counties,
+      "San Francisco" = san_fran_counties,
+      "Northern San Joaquin" = n_san_joaquin_counties,
+      "Central Coast" = central_coast_counties,
+      "Southern San Joaquin" = s_san_joaquin_counties,
+      "Inland Empire" = inland_counties,
+      "Los Angeles" = la_county,
+      "Orange County" = orange_county,
+      "San Diego Imperial" = san_diego_imperial_counties
+    )
   )
-)
 
 ```
 
@@ -356,7 +367,7 @@ ca_childcare <- ca_childcare |>
 ```{r}
 #| label: wd-4-date
 
-# From lab 5.
+# From Lab 5.
 # Here I modified an existing variable which was an integer representation of a date (i.e. 20180101) into a lubridate so that I could filter by date properties later on.
 
 final_suspect <- facebook_event_checkin |>
@@ -376,7 +387,7 @@ final_suspect <- facebook_event_checkin |>
 ```{r}
 #| label: wd-5-left-ex-1
 
-# From lab 5
+# From Lab 5
 # Here I did a left join because even if there was no correponding income data for the person, I still wanted to keep their record as income wasn't that vital to the investigation.
 
 women_matching_description <- person |>
@@ -388,14 +399,28 @@ women_matching_description <- person |>
          car_make == "Tesla",
          car_model == "Model S")
 
-
-
 ```
 
 -   `right_join()` Example 1
 
 ```{r}
 #| label: wd-5-right
+
+# Lab 5
+# I modified this problem from using inner_join to right_join as a proof of concept.
+# For this problem I wanted to join member check ins with the membership status.
+# Right join here will preserve all the check ins on the 9th regardless whether it 
+# has a corresponding member in get_fit_now members. However any NA entries are still
+# filtered out by checking for membership_status == "gold".
+
+gold_members_who_checked_in_on_9th <- get_fit_now_member |>
+  right_join(
+    get_fit_now_check_in |>
+      filter(check_in_date == 20180109) |>
+      select(membership_id) |>
+      rename(id = membership_id)
+  ) |>
+  filter(membership_status == "gold")
 
 ```
 
@@ -410,7 +435,6 @@ women_matching_description <- person |>
 # Left join here will preserve all the check ins on the 9th regardless whether it 
 # has a corresponding member in get_fit_now members. However any NA entries are still
 # filtered out by checking for membership_status == "gold".
-
 
 gold_members_who_checked_in_on_9th <- get_fit_now_check_in |>
   filter(check_in_date == 20180109) |>
@@ -427,8 +451,6 @@ gold_members_who_checked_in_on_9th <- get_fit_now_check_in |>
 
 ```{r}
 #| label: wd-5-inner-ex-1
-
-
 
 # Lab 5
 # Here I wanted to find gold members who checked in on the 9th and also had a plate number including H42W.
@@ -539,11 +561,7 @@ income_table <- ca_childcare |>
 
 The following assignments satisfy the above criteria:
 
--   Example 1
--   Example 2
--   Example 3
--   Example 4
--   Example 5
+-   Lab 3
 
 **R-2: I can write well documented and tidy code.**
 
@@ -552,7 +570,7 @@ The following assignments satisfy the above criteria:
 ```{r}
 #| label: r-2-1
 
-# From Challenge 5
+# From Challenge 4
 # Here I have a documented ggplot which uses pipes with a single function per line to eludicate the modifications to the plot clearly. I added the documentations after the fact.
 
 # I display a line plot showing the change in median childcare costs over time,
@@ -587,7 +605,7 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
 #| label: r-2-2
 
 
-# From Challenge 5
+# From Challenge 4
 # Here I have a tidy, and documented dplyr pipeline. It avoids redundant calls, creates a tidy table, and is readable. I added the documentations after the fact.
 
 # I pivot the wide summary table into a tidy, long summary table which allows us to easily plot median price for center and family based infant childcare.
@@ -621,44 +639,30 @@ summary_table_long <- summary_table |>
 ```{r}
 #| label: r-3-example
 
-# Challenge 5
-#
+# From Lab 4 Question 4
 
-summary_table_long <- summary_table |>
-  pivot_longer(
-    cols = c("median_center_price", "median_family_price"),
-    names_to = "care_type",
-    values_to = "median_price"
-  ) |>
+# This solution was revised from its initial submission. I added the other_level = "Other" to the mutate which allows for any new counties that are added to the data set that arent covered by our regions to be included as Other.
+
+
+ca_childcare <- ca_childcare |> 
   mutate(
-    care_type = fct_recode(care_type,
-      "Center-Based" = "median_center_price",
-      "Family-Based" = "median_family_price"
-    ) |>
-      fct_relevel("Family-Based", "Center-Based")
+    county_name = str_remove(county_name, " County"),
+    region = fct_collapse(county_name,
+      "Superior California" = superior_counties,
+      "North Coast" = north_coast_counties,
+      "San Francisco" = san_fran_counties,
+      "Northern San Joaquin" = n_san_joaquin_counties,
+      "Central Coast" = central_coast_counties,
+      "Southern San Joaquin" = s_san_joaquin_counties,
+      "Inland Empire" = inland_counties,
+      "Los Angeles" = la_county,
+      "Orange County" = orange_county,
+      "San Diego Imperial" = san_diego_imperial_counties,
+      other_level = "Other"
+    )
   )
-  
-ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
-  geom_line(linewidth = 1.2) +
-  geom_point(size = 3) +
-  geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
-              fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
-  labs(
-    title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
-    subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
-    x = "Year",
-    y = "Median Weekly Price (2018 Dollars)",
-    color = "Type of Childcare"
-  ) +
-  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
-  theme_minimal(base_size = 14) +
-  theme(
-    legend.position = "top",
-    plot.title = element_text(face = "bold"),
-    plot.subtitle = element_text(margin = margin(b = 10)),
-    axis.title = element_text(face = "bold"),
-    plot.background = element_rect(color = "black", linewidth = 1) 
-  )
+
+
 ```
 
 -   Example (function stops)
@@ -677,7 +681,6 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
 ```{r}
 #| label: dvs-1-num
 
-# From Challenge 5 
 
 # Lab 2 Question 4
 # Here I plotted hindfoot_length (numerical) against weight (numerical). It is also faceted by species which is categorical.
@@ -717,10 +720,6 @@ ggplot(data = surveys, mapping = aes(x = weight, y = species)) +
 # Lab 4 Question 7
 
 # This ggplot displays the weekly median costs (numerical) per year faceted by childcare type (categorical) and colored by region (categotical).
-
-# 1.) Color by region.
-# 2.) Facet by age group.
-
 
 long_childcare_data <- ca_childcare |>
   select(study_year, region, mc_infant, mc_toddler, mc_preschool) |>
@@ -816,7 +815,7 @@ ggplot(long_childcare_data, aes(x = study_year, y = price, color = region)) +
 #| label: dvs-2-ex-1
 
 # From Challenge 4
-# 
+# Here I used the minimal theme to make the plot more clear and thus easier to read.
 
 summary_table_long <- summary_table |>
   pivot_longer(
@@ -861,48 +860,30 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
 ```{r}
 #| label: dvs-2-ex-2
 
-summary_table_long <- summary_table |>
-  pivot_longer(
-    cols = c("median_center_price", "median_family_price"),
-    names_to = "care_type",
-    values_to = "median_price"
-  ) |>
-  mutate(
-    care_type = fct_recode(care_type,
-      "Center-Based" = "median_center_price",
-      "Family-Based" = "median_family_price"
-    ) |>
-      fct_relevel("Family-Based", "Center-Based")
-  )
-  
-ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
-  geom_line(linewidth = 1.2) +
-  geom_point(size = 3) +
-  geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
-              fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
-  labs(
-    title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
-    subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
-    x = "Year",
-    y = "Median Weekly Price (2018 Dollars)",
-    color = "Type of Childcare"
-  ) +
-  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
-  theme_minimal(base_size = 14) +
-  theme(
-    legend.position = "top",
-    plot.title = element_text(face = "bold"),
-    plot.subtitle = element_text(margin = margin(b = 10)),
-    axis.title = element_text(face = "bold"),
-    plot.background = element_rect(color = "black", linewidth = 1) 
-  )
+# Lab 2 Question 16
 
+# I modified this problem by changing the point coloring from steel blue to scale_color_viridis_d().
+
+# For this plot I used scale_color_viridis_d() which colors the points using a color scheme for color blind individuals.
+
+
+ggplot(data = surveys, mapping = aes(x = weight, y = species)) +
+  geom_boxplot(outliers=FALSE, orientation="y") +
+  geom_jitter(alpha=0.1)  +
+  scale_color_viridis_d() +
+  labs(x = "Weight (g)",
+       y = "Species",
+       title = "Distribution of Weight by Species")
 ```
 
 -   I can modify my plot titles to clearly communicate the data context
 
 ```{r}
 #| label: dvs-2-ex-3
+
+
+# Challenge 4
+# I added a descriptive title, subtitle, x, and y axis titles to make the plot more readable.
 
 summary_table_long <- summary_table |>
   pivot_longer(
@@ -948,20 +929,9 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
 ```{r}
 #| label: dvs-2-ex-4
 
-summary_table_long <- summary_table |>
-  pivot_longer(
-    cols = c("median_center_price", "median_family_price"),
-    names_to = "care_type",
-    values_to = "median_price"
-  ) |>
-  mutate(
-    care_type = fct_recode(care_type,
-      "Center-Based" = "median_center_price",
-      "Family-Based" = "median_family_price"
-    ) |>
-      fct_relevel("Family-Based", "Center-Based")
-  )
-  
+# Challenge 4
+# I added a descriptive title, subtitle, x, and y axis titles to make the plot more readable.
+
 ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
   geom_line(linewidth = 1.2) +
   geom_point(size = 3) +
@@ -993,20 +963,6 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
 
 # Challenge 4
 # I reordered the legend to make it so it was more intuitive to read from the bottom up. 
-
-summary_table_long <- summary_table |>
-  pivot_longer(
-    cols = c("median_center_price", "median_family_price"),
-    names_to = "care_type",
-    values_to = "median_price"
-  ) |>
-  mutate(
-    care_type = fct_recode(care_type,
-      "Center-Based" = "median_center_price",
-      "Family-Based" = "median_family_price"
-    ) |>
-      fct_relevel("Family-Based", "Center-Based")
-  )
   
 ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
   geom_line(linewidth = 1.2) +
@@ -1039,8 +995,9 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
 ```{r}
 #| label: dvs-3-1-ex-1
 
-# Challenge 5
+# Challenge 4
 # Here I used skyblue to denote the area / difference between the price of both care types.
+
 ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
   geom_line(linewidth = 1.2) +
   geom_point(size = 3) +
@@ -1070,12 +1027,30 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
 ```{r}
 #| label: dvs-3-1-ex-2
 
+# From Challenge 3
+# In this example I specified custom colors for the plot using hex codes.
+
+ggplot(data = teacher_evals_compare,
+       mapping = aes(x = sen_level, fill = SET_level)) +
+  geom_bar(position = "fill") +
+  theme_minimal() +
+  theme(legend.position = "top", panel.border = element_rect(color = "black")) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c("standard" = "#ba945c", "excellent" = "#b796d4")) +
+  labs(
+    x = "Years of Experience",
+    y = NULL,
+    fill = "Evaluation Rating",
+    title = "Evaluation of Teachers' Use of Activities"
+  ) 
+
 ```
 
 -   I can use annotations (e.g., `geom_text()`)
 
 ```{r}
 #| label: dvs-3-2
+
 
 ```
 
@@ -1084,7 +1059,7 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
 ```{r}
 #| label: dvs-3-3
 
-# Challenge 5
+# Challenge 4
 # Here I used geom_ribbon to denote the price difference between family-based and center-based infant care costs.
 
 ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
@@ -1119,6 +1094,18 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
 ```{r}
 #| label: dvs-4-summarize
 
+# Lab 3 Question 6
+
+# In this example I use summarize to quickly compute and display the number of unique courses and teachers.
+
+# This was revised from my initial submission which computed these values seperatly and returned them as individual values. The summary table is much more concise and readable.
+
+teacher_evals_clean |>
+  summarize(
+    num_unique_teachers = n_distinct(teacher_id),
+    num_unique_courses = n_distinct(course_id)
+    )
+
 ```
 
 -   Example using `across()`
@@ -1128,6 +1115,68 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
 
 # Lab 3 Question 5
 # 
+
+
+```
+
+\
+
+**DVS-5: I can find summaries of variables across multiple groups.**
+
+-   Example 1
+
+```{r}
+#| label: dvs-5-1
+
+# Lab 3 Question 9
+
+# Here I grouped the teacher evaluations by course and teacher in order to find the number of teacher course combinations who asked all nine questions.
+
+teacher_evals_clean |>
+  group_by(course_id, teacher_id) |>
+  summarize(number_of_questions = n_distinct(question_no)) |>
+  filter(number_of_questions == 9) |>
+  nrow()
+
+```
+
+-   Example 2
+
+```{r}
+#| label: dvs-5-2
+
+# Lab 4 Question 5
+# Here I created a summary table which works by grouping ca_childcare by region and study_year in order to compute the median 2018 inflation adjusted earnings.
+
+# This particular code segment was revised; I added the "Median Income" prefix to make the column titles more descriptive.
+
+income_table <- ca_childcare |>
+  filter(study_year %in% c(2008, 2018)) |>
+  group_by(region, study_year) |>
+  summarise(
+    median_income = median(me_2018),
+  ) |>
+  ungroup() |>
+  pivot_wider(
+    names_from = study_year,
+    values_from = median_income,
+    names_prefix = "Median Income "
+  ) |>
+  arrange(desc(`Median Income 2018`))
+
+
+```
+
+**DVS-6: I can create tables which make my summaries clear to the reader.**
+
+-   I can modify my column names to clearly communicate the data context
+
+```{r}
+#| label: dvs-6-ex-1
+
+# Lab 3 Question 5
+# Here I used rename to rename the gender column to sex as sex is a more accurate title when referring to male or female.
+
 
 teacher_evals_clean <- teacher_evals |>
   rename(sex = gender) |>
@@ -1150,33 +1199,6 @@ teacher_evals_clean <- teacher_evals |>
 
 ```
 
-\
-
-**DVS-5: I can find summaries of variables across multiple groups.**
-
--   Example 1
-
-```{r}
-#| label: dvs-5-1
-
-```
-
--   Example 2
-
-```{r}
-#| label: dvs-5-2
-
-```
-
-**DVS-6: I can create tables which make my summaries clear to the reader.**
-
--   I can modify my column names to clearly communicate the data context
-
-```{r}
-#| label: dvs-6-ex-1
-
-```
-
 -   I can modify the text in my table to be more readable (e.g., bold face for column headers)
 
 ```{r}
@@ -1188,6 +1210,24 @@ teacher_evals_clean <- teacher_evals |>
 
 ```{r}
 #| label: dvs-6-ex-3
+
+# Lab 4 Question 5
+# Here I created a summary table which displays regions and their median incomes for 2008 and 2018.
+# This particular code segment was revised; I added the "Median Income" prefix to make the column titles more descriptive.
+
+income_table <- ca_childcare |>
+  filter(study_year %in% c(2008, 2018)) |>
+  group_by(region, study_year) |>
+  summarise(
+    median_income = median(me_2018),
+  ) |>
+  ungroup() |>
+  pivot_wider(
+    names_from = study_year,
+    values_from = median_income,
+    names_prefix = "Median Income "
+  ) |>
+  arrange(desc(`Median Income 2018`))
 
 ```
 
@@ -1216,6 +1256,29 @@ teacher_evals_clean <- teacher_evals |>
 ```{r}
 #| label: pe-1-one-call
 
+# Lab 4 Question 4
+
+# Here I removed " County" from county_name and added a new column in one call to mutate rather than using two seperate piped calls to mutate
+
+# This solution was revised from its initial submission. I removed the initial mutate for just county_name, and moved it into the mutate for collapsing into the region as an aditional argument.
+
+ca_childcare <- ca_childcare |> 
+  mutate(
+    county_name = str_remove(county_name, " County"),
+    region = fct_collapse(county_name,
+      "Superior California" = superior_counties,
+      "North Coast" = north_coast_counties,
+      "San Francisco" = san_fran_counties,
+      "Northern San Joaquin" = n_san_joaquin_counties,
+      "Central Coast" = central_coast_counties,
+      "Southern San Joaquin" = s_san_joaquin_counties,
+      "Inland Empire" = inland_counties,
+      "Los Angeles" = la_county,
+      "Orange County" = orange_county,
+      "San Diego Imperial" = san_diego_imperial_counties
+    )
+  )
+
 ```
 
 -   using `across()`
@@ -1224,7 +1287,7 @@ teacher_evals_clean <- teacher_evals |>
 #| label: pe-1-across
 
 # Lab 3 Question 5
-# 
+# In this problem I used across to convert 6 columns to a factor in one function call.
 
 teacher_evals_clean <- teacher_evals |>
   rename(sex = gender) |>
@@ -1285,7 +1348,7 @@ teacher_evals_clean <- teacher_evals |>
 #| label: pe-3-across
 
 # Lab 3 Question 5
-# 
+# Here I used the across function to convert 6 columns to a factor in one line.
 
 teacher_evals_clean <- teacher_evals |>
   rename(sex = gender) |>
@@ -1366,7 +1429,7 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
     plot.title = element_text(face = "bold"),
     plot.subtitle = element_text(margin = margin(b = 10)),
     axis.title = element_text(face = "bold"),
-    plot.background = element_rect(color = "black", linewidth = 1) 
+    plot.background = element_rect(color = "black", linewidth = 1))
 
 ```
 
@@ -1411,7 +1474,7 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
     plot.title = element_text(face = "bold"),
     plot.subtitle = element_text(margin = margin(b = 10)),
     axis.title = element_text(face = "bold"),
-    plot.background = element_rect(color = "black", linewidth = 1) 
+    plot.background = element_rect(color = "black", linewidth = 1) )
 
 
 ```
@@ -1441,12 +1504,31 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
 ```{r}
 #| label: dsm-2-1
 
+# Lab 4 Question 9
+# Here I used lm to fit a linear regression model to the relationship between infant childcare Price and the median household income in California.
+
+reg_mod1 <- lm(mc_infant ~ mhi_2018, data = ca_childcare)
+
+summary(reg_mod1)
+
 ```
 
 -   Example 2
 
 ```{r}
 #| label: dsm-2-2
+
+# Lab 1 Question 10
+
+# Here I used a two sample t-test to compare the mean tooth length for the OJ supplement delivery method and the treatment method.
+
+t.test(len ~ supp, data = ToothGrowth, var.equal = FALSE)
+
+## Two Sample T Test For Tooth Growth Data
+
+## 1. Given p = 0.06063 > α = 0.05, there is insufficient statistically significant evidence to reject the hypothesis that treatment mean tooth length for the OJ supplement delivery method  is the same as the treatment mean tooth length for the VC supplement delivery method.
+
+## 2. Given a 95% confidence interval of (-0.1710156, 7.5710156) we are 95% confident the difference between tooth length true difference in means between group OJ and group VC is between -0.171015 and 7.5710156. Since this interval contains zero, we cannot assert the group population means are likely different.
 
 ```
 
@@ -1459,16 +1541,33 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
 
 ## Revising My Thinking
 
-<!-- How did you revise your thinking throughout the course? How did you revise your thinking on the code examples you have provided in your portfolio? -->
+Throughout the course I received a wide array of feedback ranging from correctness, code neatness, providing context to data, reducing repetition in my code, and more. For the sake of demonstration my ability to revise my thinking I am going to focus on how I was able to reduce repetition in my code following feedback.\
+The two examples of revision I will cite is Lab 3 Question 6 (**dvs-4-summarize**) and Lab 4 Question 4 (**pe-1-one-call)**, both of which are referenced in this portfolio. If you scroll below you can see what both code segments looked like before. For lab 4 question 4, there was a duplicate mutate and pipe which was not necessary to modify the county_name before collapsing it into regions. My revision was simply performing this modification using an additional argument in the other mutate rather than adding a whole new pipe and mutate. Additionally, I revised lab 3 question 6 in order to improve code repetition. In this more egregious example I used two separate dplyr pipelines to extract the number of unique courses and unique teachers in the data frame. After receiving feedback I modified the solution to compute both values in a single summary table as two different columns.
 
-<!-- For the revisions included in your Portfolio, to help me understand the nature of your revisions, please denote somehow the feedback I provided you (e.g., boldface, italics, colored text) before your revisions. -->
+More importantly than just blindly implementing these changes, I learned the importance of reducing code repetition: these documents are supposed to be a reproducible report, and intended to be easily understandable by the reader. Non-repetitive code reduces the mental burden of the reader and allows them to focus on what matters, the analysis. Learning the tips and tricks is one thing, but gaining a mindset of reducing repetition is whats far more valuable side-effect of these revisions.
+
+Lab 4 Question 4 Before Revision:
+
+![](images/clipboard-3145997561.png)
+
+Lab 3 Question 6 Before Revision:
+
+![](images/clipboard-3405513232.png)
 
 ## Extending My Thinking
 
-<!-- How did you extended your thinking throughout the course? How did you extend your thinking on the code examples you have provided in your portfolio? -->
+\
+\
+Throughout the labs and challenges I have had several opportunities to extend my thinking. Most questions in the labs provided a lot of guidance so I could garner a foundation. However, some questions such as Lab 4 Question 7 gave us opportunities to our extend our thinking by serving as multi-step, non-obvious questions. This lab question in particular forced me to think outside the box and find outside resources to solve the problem. More specifically, in attempting to match the color palette I came across the [colorRampPallete](https://www.rdocumentation.org/packages/dichromat/versions/1.1/topics/colorRampPalette) R documentation. I didn't recall learning this in class, so I had to extend my thinking by understanding these docs and doing my best to match the color theme of the plot.
+
+However, I found the challenges to be the best way to extend my thinking. The labs provided a great base to learn the foundation skills, then I could combine those skills with what I learn from additional research. The best illustration of this is my repeated use of Challenge #4 throughout my portfolio. In this challenge I identified a research question: How has the median price of full-time, center-based infant childcare in California compared to that of family-based infant childcare, and has the price gap between these two options widened or narrowed between 2008 and 2018? I realized that the difference between the two median costs when extrapolated across the time series creates an area representing the price differential. However, up to this point in the course, we hadn't used an area plot and was unfamiliar with how to plot the plot area between two lines in ggplot. So I googled that question, and came across [geom_ribbon](https://ggplot2.tidyverse.org/reference/geom_ribbon.html) which I incorporated into my plot and subsequent analysis.
 
 ## Peer Support & Collaboration
 
-<!-- Include an image or a description of feedback you gave that you are proud of (either in a peer review or in Discord). -->
+![](images/clipboard-3327786451.png)
 
-<!-- Include a description of how you grew as a collaborator through the weekly pair programming activities.   -->
+![](images/clipboard-3713802392.png)
+
+Above are two examples of when I provided peer feedback in the Discord channel. I am proud of these in particular as I was able to provide quick feedback to problems that could have left my peers stuck. Particularly, for the first example I feel like I did a good job of not giving the answer but guiding towards it so that my peer could still learn from the problem.\
+\
+The weekly pair programming activities were eye an opening, and well-designed learning experience. Namely, the forced separation into two distinct roles helped me learn about myself and learn course outcomes more effectively. Being forced to be passive, I found that I have a real tendency to speak up as to avoid awkward silence, a tendency which can really hurt the group problem solving process. Giving my partner the time to think, and waiting until they express a willingness to discuss the problem gave them the time and space to reason through a problem. This also allowed me to learn new approaches to problems such as using if_all in PA 4 Problem 3. If I were to break the silence and interject, we could've ended up with my solution which was far worse an involved enumerating every column and using is.na().
