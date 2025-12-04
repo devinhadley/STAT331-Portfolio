@@ -105,12 +105,17 @@ teacher_evals_clean <- teacher_evals |>
 
 # PA 5.3 Question 3
 
-# In this problem I effectively remove columns by negating the condition that the day of the week is Tuesday or Thursday. 
+# In this problem I remove the mark column from the fish data set by combinig select with the negation operator. I did this because mark wasn't a necessary column for our analysis.
 
-suspects |>
-  filter( ! (wday(Time.Spotted, label = TRUE, abbr = FALSE) %in% c("Tuesday", "Thursday")) )
+# This solution was modified from the original solution, I realised I could reduce the size of the table we store in memory by discarding unused columns.
 
+fish <- fish |>
+  select(-mark)
 
+missing_summary <- fish |>
+  summarise(across(everything(), 
+                   ~ sum(is.na(.x)), 
+                   .names = "{col}_missing"))
 ```
 
 -   Example selecting columns based on logical values (e.g., `starts_with()`, `ends_with()`, `contains()`, `where()`)
@@ -118,9 +123,32 @@ suspects |>
 ```{r}
 #| label: wd-2-ex-3
 
-# From Lab 4 Question 7
-# Altough its not select(), pivot longer is selecting columns based on the starts_with selector.
+# From Lab 10 Question 8
+# In this problem is use starts_with("conf") inside of select in order to include the conf.low and conf.high in the final table.
 
+mycifun <- function(beta0, beta1, n) {
+  
+  x = runif(n = n, min = 0, max = 1)
+  
+  ep = rnorm(n = n, mean = 0, sd = 1)
+  
+  y = beta0 + beta1 * x + ep
+  
+  obs_data <- data.frame(x = x, y = y)
+  
+  fit <- lm(y ~ x, data = obs_data)
+  
+  tidy(fit, conf.int = TRUE) |>
+    filter(term == "x") |>
+    mutate(cover = ifelse(conf.low <= beta1 & beta1 <= conf.high,
+                          1,
+                          0
+                          )) |>
+    select(estimate,
+           starts_with("conf"),
+           cover)
+  
+}
 
 ```
 
@@ -796,8 +824,9 @@ rescale_01 <- function(vector) {
 # Here I plotted hindfoot_length (numerical) against weight (numerical). It is also faceted by species which is categorical.
 
 ggplot(data = surveys,
-       mapping = aes(x=weight, y=hindfoot_length)) +
-  geom_point(alpha=0.3) + facet_wrap(~ species) + labs(x = "Weight (g)", y = "",
+       mapping = aes(x=weight,
+                     y=hindfoot_length)) +
+ geom_point(alpha=0.3) + facet_wrap(~ species) + labs(x = "Weight (g)", y = "",
  title ="Scatterplot of Hindfoot Length vs Weight of Various Species",
  subtitle = "Hindfoot Length (mm)")
 
@@ -1776,7 +1805,13 @@ ci_dat <- map(.x = 1:1000,
 ```{r}
 #| label: pe-3-map-2
 
+# From Lab 9 Question 2
+# Here I use map_chr(typeof) to get the data type of each variable in the surveys dataset.
 
+data_types <- surveys |>
+  map_chr(typeof) |>
+  enframe(name = "Variable",
+          value = "Data Type")
 
 ```
 
@@ -1787,43 +1822,29 @@ ci_dat <- map(.x = 1:1000,
 ```{r}
 #| label: pe-4-1
 
-# Challenge 4
-# Here I created an analysis using non-deprecated ggplot and dplyr functions.
+# Challenge 3 Question 2
 
-summary_table_long <- summary_table |>
-  pivot_longer(
-    cols = c("median_center_price", "median_family_price"),
-    names_to = "care_type",
-    values_to = "median_price"
-  ) |>
-  mutate(
-    care_type = fct_recode(care_type,
-      "Center-Based" = "median_center_price",
-      "Family-Based" = "median_family_price"
-    ) |>
-      fct_relevel("Family-Based", "Center-Based")
-  )
-  
-ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
-  geom_line(linewidth = 1.2) +
-  geom_point(size = 3) +
-  geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
-              fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
-  labs(
-    title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
-    subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
-    x = "Year",
-    y = "Median Weekly Price (2018 Dollars)",
-    color = "Type of Childcare"
+# I modified this from the original: I changed scales::percent to the non-deprecated scales::label_percent().
+
+ggplot(data = teacher_evals_compare,
+       mapping = aes(x = sen_level, fill = SET_level)) +
+  geom_bar(position = "fill") +
+  geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    position = position_fill(vjust = 0.5),
+    size = 3.5
   ) +
-  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
-  theme_minimal(base_size = 14) +
-  theme(
-    legend.position = "top",
-    plot.title = element_text(face = "bold"),
-    plot.subtitle = element_text(margin = margin(b = 10)),
-    axis.title = element_text(face = "bold"),
-    plot.background = element_rect(color = "black", linewidth = 1))
+  theme_minimal() +
+  theme(legend.position = "top", panel.border = element_rect(color = "black")) +
+  scale_y_continuous(labels = scales::label_percent()) +
+  scale_fill_manual(values = c("standard" = "#ba945c", "excellent" = "#b796d4")) +
+  labs(
+    x = "Years of Experience",
+    y = NULL,
+    fill = "Evaluation Rating",
+    title = "Evaluation of Teachers' Use of Activities"
+  )
 
 ```
 
@@ -1833,9 +1854,12 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
 #| label: pe-4-2
 
 # Challenge 4
+
 # Here I used dplyr to "wrangle" the summary table and then use that table within ggplot.
 
-summary_table_long <- summary_table |>
+# I modified this from the original to connect the summary table direclty to ggplot with a table.
+
+summary_table |>
   pivot_longer(
     cols = c("median_center_price", "median_family_price"),
     names_to = "care_type",
@@ -1848,28 +1872,27 @@ summary_table_long <- summary_table |>
     ) |>
       fct_relevel("Family-Based", "Center-Based")
 
-  )
-  
-ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
-  geom_line(linewidth = 1.2) +
-  geom_point(size = 3) +
-  geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
+  ) |>
+  ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
+    geom_line(linewidth = 1.2) +
+    geom_point(size = 3) +
+    geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
               fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
-  labs(
-    title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
-    subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
-    x = "Year",
-    y = "Median Weekly Price (2018 Dollars)",
-    color = "Type of Childcare"
-  ) +
-  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
-  theme_minimal(base_size = 14) +
-  theme(
-    legend.position = "top",
-    plot.title = element_text(face = "bold"),
-    plot.subtitle = element_text(margin = margin(b = 10)),
-    axis.title = element_text(face = "bold"),
-    plot.background = element_rect(color = "black", linewidth = 1) )
+    labs(
+      title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
+      subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",
+      x = "Year",
+      y = "Median Weekly Price (2018 Dollars)",
+      color = "Type of Childcare"
+    ) +
+    scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+    theme_minimal(base_size = 14) +
+    theme(
+      legend.position = "top",
+      plot.title = element_text(face = "bold"),
+      plot.subtitle = element_text(margin = margin(b = 10)),
+      axis.title = element_text(face = "bold"),
+      plot.background = element_rect(color = "black", linewidth = 1) )
 
 
 ```
