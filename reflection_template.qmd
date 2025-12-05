@@ -14,7 +14,7 @@ execute:
 
 [**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an A-.
 
-[**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code frffPom Lab or Challenge assignments where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
+[**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code from Lab or Challenge assignments where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
 
 ## Working with Data
 
@@ -49,14 +49,7 @@ childcare_costs <- read_csv('https://raw.githubusercontent.com/rfordatascience/t
 #| label: wd-1-xlsx
 
 # From Practice Activity 4
-# Loading an xslx in google c  
-
-
-
-
-
-
-zolab.
+# Loading an xslx in google colab.
 
 military <- read_xlsx("gov_spending_per_capita.xlsx",
                       sheet = "Share of Govt. spending",
@@ -81,7 +74,13 @@ teacher_evals_clean <- teacher_evals |>
   rename(sex = gender) |>
   filter(no_participants > 9) |>
   mutate(
-    across(c(academic_degree, sex, weekday, course_id, teacher_id, question_no), as.factor),
+    across(c(academic_degree,
+             sex,
+             weekday,
+             course_id,
+             teacher_id,
+             question_no),
+           as.factor),
   ) |>
   select(
     course_id,
@@ -107,7 +106,7 @@ teacher_evals_clean <- teacher_evals |>
 
 # In this problem I remove the mark column from the fish data set by combinig select with the negation operator. I did this because mark wasn't a necessary column for our analysis.
 
-# This solution was modified from the original solution, I realised I could reduce the size of the table we store in memory by discarding unused columns.
+# This solution was modified from the original solution, I realised I could reduce the size of the table we store in memory by discarding unused columns in the beginning.
 
 fish <- fish |>
   select(-mark)
@@ -168,7 +167,13 @@ teacher_evals_clean <- teacher_evals |>
   rename(sex = gender) |>
   filter(no_participants > 9) |>
   mutate(
-    across(c(academic_degree, sex, weekday, course_id, teacher_id, question_no), as.factor),
+    across(c(academic_degree,
+             sex,
+             weekday,
+             course_id,
+             teacher_id,
+             question_no),
+           as.factor),
   ) |>
   select(
     course_id,
@@ -196,7 +201,9 @@ teacher_evals_clean <- teacher_evals |>
 teacher_evals_compare <- teacher_evals |>
   filter(question_no == 903) |>
   mutate(
-    SET_level = if_else(SET_score_avg >= 4, "excellent", "standard"),
+    SET_level = if_else(SET_score_avg >= 4,
+                        "excellent",
+                        "standard"),
     sen_level = case_when(
       seniority <= 4          ~ "junior",
       seniority <= 8          ~ "senior",
@@ -233,7 +240,8 @@ gold_members_who_checked_in_on_9th <- get_fit_now_check_in |>
 # Here I filter using str_detect to get strings which contain H42W.
 
 person |>
-  semi_join(gold_members_who_checked_in_on_9th, by = c("id" = "person_id")) |>
+  semi_join(gold_members_who_checked_in_on_9th,
+            by = c("id" = "person_id")) |>
   inner_join(drivers_license, by = c("license_id" = "id")) |>
   filter(str_detect(plate_number, "H42W"))
 
@@ -249,7 +257,9 @@ person |>
 
 final_suspect <- facebook_event_checkin |>
   mutate(date = ymd(date)) |>
-  filter(year(date) == 2017, month(date) == 12, event_name == "SQL Symphony Concert")|>
+  filter(year(date) == 2017,
+         month(date) == 12,
+         event_name == "SQL Symphony Concert")|>
   group_by(person_id) |>
   filter(n() == 3) |>
   inner_join(women_matching_description, by = c("person_id" = "id"))
@@ -268,7 +278,7 @@ final_suspect <- facebook_event_checkin |>
 
 teacher_evals_clean |>
   distinct(teacher_id, .keep_all = TRUE) |>
-  count(sex, name="count") |>
+  count(sex, name = "count") |>
   mutate(percentage = count / sum(count) * 100)
 
 
@@ -348,8 +358,8 @@ long_childcare_data <- left_join(ca_childcare, income_table, by="region") |>
   ) |>
   mutate(
     age_group = fct_recode(age_group,
-    "Infant"    = "mc_infant",
-    "Toddler"   = "mc_toddler",
+    "Infant" = "mc_infant",
+    "Toddler" = "mc_toddler",
     "Preschool" = "mc_preschool"
     ),
     age_group = fct_relevel(age_group, "Infant", "Toddler", "Preschool"),
@@ -379,15 +389,15 @@ evals_factors |>
   ) |>
     mutate(
     `Academic Degree` = fct_recode(`Academic Degree`,
-      "Doctorate"         = "dr",
-      "Masters"           = "ma",
-      "No Degree"         = "no_dgr",
+      "Doctorate" = "dr",
+      "Masters" = "ma",
+      "No Degree" = "no_dgr",
       "Tenured Professor" = "prof"
     ),
     Seniority = case_when(
-      Seniority <= 4          ~ "Junior",
-      Seniority <= 8          ~ "Senior",
-      TRUE                ~ "Very Senior"
+      Seniority <= 4 ~ "Junior",
+      Seniority <= 8 ~ "Senior",
+      TRUE ~ "Very Senior"
     ),
     Sex = fct_relabel(Sex, str_to_title)
   ) |>
@@ -416,7 +426,9 @@ evals_factors |>
 
 final_suspect <- facebook_event_checkin |>
   mutate(date = ymd(date)) |>
-  filter(year(date) == 2017, month(date) == 12, event_name == "SQL Symphony Concert")|>
+  filter(year(date) == 2017,
+         month(date) == 12,
+         event_name == "SQL Symphony Concert")|>
   group_by(person_id) |>
   filter(n() == 3) |>
   inner_join(women_matching_description, by = c("person_id" = "id"))
@@ -517,9 +529,8 @@ person |>
 # Here I used an inner join as it only made sense in the context of the assignment to analyze counties with corresponding childcare cost data. Thus there is no reason to include counties without costs or costs without a corresponding county in our dataframe.
 
 ca_childcare <- 
-  inner_join(counties, childcare_costs, by="county_fips_code") |>
+  inner_join(counties, childcare_costs, by = "county_fips_code") |>
   filter(state_abbreviation == "CA")
-
 
 ```
 
@@ -824,8 +835,8 @@ rescale_01 <- function(vector) {
 # Here I plotted hindfoot_length (numerical) against weight (numerical). It is also faceted by species which is categorical.
 
 ggplot(data = surveys,
-       mapping = aes(x=weight,
-                     y=hindfoot_length)) +
+       mapping = aes(x = weight,
+                     y = hindfoot_length)) +
  geom_point(alpha=0.3) + facet_wrap(~ species) + labs(x = "Weight (g)", y = "",
  title ="Scatterplot of Hindfoot Length vs Weight of Various Species",
  subtitle = "Hindfoot Length (mm)")
@@ -842,7 +853,9 @@ ggplot(data = surveys,
 # Here I used ggplot to create boxplots of weight (numerical) by species (categorical).
 
 ggplot(data = surveys, mapping = aes(x = weight, y = species)) +
-  geom_boxplot(outliers=FALSE, orientation="y", aes(color = sex)) +
+  geom_boxplot(outliers = FALSE,
+               orientation = "y",
+               aes(color = sex)) +
   scale_colour_viridis_d() +
   geom_jitter(alpha=0.1, color="steelblue") +
   labs(x = "Weight (g)",
@@ -917,8 +930,8 @@ long_childcare_data <- left_join(ca_childcare, income_table, by="region") |>
   ) |>
   mutate(
     age_group = fct_recode(age_group,
-    "Infant"    = "mc_infant",
-    "Toddler"   = "mc_toddler",
+    "Infant" = "mc_infant",
+    "Toddler" = "mc_toddler",
     "Preschool" = "mc_preschool"
     ),
     age_group = fct_relevel(age_group, "Infant", "Toddler", "Preschool"),
@@ -1004,6 +1017,8 @@ ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_ty
 
 # I modified this from the original: I changed scales::percent to the non-deprecated scales::label_percent().
 
+# I also modified the hex codes to be true tone, which is a color-blind safe color combination per https://davidmathlogic.com/colorblind/#%23D81B60-%231E88E5-%23FFC107-%23004D40.
+
 ggplot(data = teacher_evals_compare,
        mapping = aes(x = sen_level, fill = SET_level)) +
   geom_bar(position = "fill") +
@@ -1016,7 +1031,7 @@ ggplot(data = teacher_evals_compare,
   theme_minimal() +
   theme(legend.position = "top", panel.border = element_rect(color = "black")) +
   scale_y_continuous(labels = scales::label_percent()) +
-  scale_fill_manual(values = c("standard" = "#ba945c", "excellent" = "#b796d4")) +
+  scale_fill_manual(values = c("standard" = "#D81B60", "excellent" = "#1E88E5")) +
   labs(
     x = "Years of Experience",
     y = NULL,
@@ -1130,8 +1145,8 @@ long_childcare_data <- left_join(ca_childcare, income_table, by="region") |>
   ) |>
   mutate(
     age_group = fct_recode(age_group,
-    "Infant"    = "mc_infant",
-    "Toddler"   = "mc_toddler",
+    "Infant" = "mc_infant",
+    "Toddler" = "mc_toddler",
     "Preschool" = "mc_preschool"
     ),
     age_group = fct_relevel(age_group, "Infant", "Toddler", "Preschool"),
@@ -1582,6 +1597,8 @@ ca_childcare <- ca_childcare |>
 # Lab 3 Question 5
 # In this problem I used across to convert 6 columns to a factor in one function call.
 
+# I modified this from the original to use modern lambda syntax.
+
 teacher_evals_clean <- teacher_evals |>
   rename(sex = gender) |>
   filter(no_participants > 9) |>
@@ -1857,7 +1874,7 @@ ggplot(data = teacher_evals_compare,
 
 # Here I used dplyr to "wrangle" the summary table and then use that table within ggplot.
 
-# I modified this from the original to connect the summary table direclty to ggplot with a table.
+# I modified this from the original to connect the summary table direclty to ggplot with a pipe
 
 summary_table |>
   pivot_longer(
@@ -1876,8 +1893,14 @@ summary_table |>
   ggplot(summary_table_long, aes(x = study_year, y = median_price, color = care_type)) +
     geom_line(linewidth = 1.2) +
     geom_point(size = 3) +
-    geom_ribbon(data = summary_table, aes(x = study_year, ymin = median_family_price, ymax = median_center_price, group = 1),
-              fill = "skyblue", alpha = 0.3, inherit.aes = FALSE) +
+    geom_ribbon(data = summary_table,
+                aes(x = study_year,
+                    ymin = median_family_price,
+                    ymax = median_center_price,
+                    group = 1),
+              fill = "skyblue",
+              alpha = 0.3,
+              inherit.aes = FALSE) +
     labs(
       title = "Median Weekly Infant Childcare Costs in California (2008-2018)",
       subtitle = "Based off the aggregated median price for each care type on an annual basis in various California counties.",

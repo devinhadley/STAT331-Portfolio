@@ -8,7 +8,7 @@ editor: visual
 
 1.  Finish the sentence with another student’s name: "If \[Name of Student\] doesn’t earn an A, then nobody should, because..." Explain your choice and your reasoning.\
     \
-    If **Rayan Tahir** doesn't earn an A, then nobody should, because
+    If **Rayan Tahir** doesn't earn an A, then nobody should, because Rayan demonstrated a deep knowledge of course content whenever I had a question. He was always happy to help me, and the advice he gave was never short of helpful.
 
 2.  What was the most difficult part of the class for you? List a general topic, a specific problem, a kind of work we did, etc. and explain why.
 
@@ -16,8 +16,12 @@ The most difficult part of this class was definitely learning the semantics and 
 
 1.  What was the easiest part of the class for you? Explain why.
 
-    I think the easiest part of the class for me was understanding the principles of efficiency.
+    I found the principles of efficiency the easiest to grasp, largely due to the parallels with software engineering. In both disciplines, optimization isn't just about runtime speed; it’s about maintainability. The emphasis on writing clear, well-formatted code.
 
 2.  What part of the class surprised or interested you the most? Explain why.
 
+    I was most surprised by the steep learning curve of R. Given my programming background, I expected to pick it up effortlessly. However, R’s paradigm differs significantly from other languages I have used. In particular, I struggled to grasp how R handles variable scoping—specifically, the ability to reference column names directly as variables within functions, which felt counterintuitive at first.
+
 3.  Give one piece of advice to a student just beginning a quarter of STAT 331 that will help them be successful in learning.
+
+    The biggest advice I can give is to go beyond rote memorization. R is the foundation of this entire course, and not understanding this foundation can hinder progression in the course. Instead of just accepting that a pipe (\|\>) passes data into a plot, take the time to learn why that works. When you understand what the language is actually doing computationally, you can leverage its tools much more effectively.
