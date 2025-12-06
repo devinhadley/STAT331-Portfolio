@@ -20,8 +20,8 @@ The most difficult part of this class was definitely learning the semantics and 
 
 2.  What part of the class surprised or interested you the most? Explain why.
 
-    I was most surprised by the steep learning curve of R. Given my programming background, I expected to pick it up effortlessly. However, R’s paradigm differs significantly from other languages I have used. In particular, I struggled to grasp how R handles variable scoping—specifically, the ability to reference column names directly as variables within functions, which felt counterintuitive at first.
+    I was most surprised by the steep learning curve of R. Given my programming background, I expected to pick it up effortlessly. However, R’s paradigm differs significantly from other languages I have used. In particular, I struggled to grasp how R handles variable scoping. For example, the ability to reference column names directly as variables within functions felt counter-intuitive.
 
 3.  Give one piece of advice to a student just beginning a quarter of STAT 331 that will help them be successful in learning.
 
-    The biggest advice I can give is to go beyond rote memorization. R is the foundation of this entire course, and not understanding this foundation can hinder progression in the course. Instead of just accepting that a pipe (\|\>) passes data into a plot, take the time to learn why that works. When you understand what the language is actually doing computationally, you can leverage its tools much more effectively.
+    The biggest advice I can give is to go beyond rote memorization. R is the foundation of this entire course, and not understanding this foundation can hinder progression in the course. Instead of just accepting that a pipe (\|\>) passes data into a plot, take the time to learn why that works. When you understand what the language is actually doing under the hood, you can leverage its tools much more effectively.
